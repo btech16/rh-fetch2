@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "rh-fetch"
-include ':app'
+include ':simple_app'
 include ':fetch2'
 include ':fetch2core'
 include ':fetch2okhttp'

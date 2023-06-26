@@ -4,7 +4,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.tonyodev.fetch2.*
+import androidx.core.content.ContextCompat
+import com.tonyodev.fetch2.ACTION_QUEUE_BACKOFF_RESET
+import com.tonyodev.fetch2.Download
+import com.tonyodev.fetch2.EXTRA_NAMESPACE
+import com.tonyodev.fetch2.NetworkType
+import com.tonyodev.fetch2.PrioritySort
 import com.tonyodev.fetch2.downloader.DownloadManager
 import com.tonyodev.fetch2.fetch.ListenerCoordinator
 import com.tonyodev.fetch2.provider.DownloadProvider
@@ -77,10 +82,21 @@ class PriorityListProcessorImpl constructor(
 
     init {
         networkInfoProvider.registerNetworkChangeListener(networkChangeListener)
-        context.registerReceiver(
-            priorityBackoffResetReceiver,
-            IntentFilter(ACTION_QUEUE_BACKOFF_RESET)
-        )
+
+        // Create an instance of IntentFilter.
+        val filter = IntentFilter(ACTION_QUEUE_BACKOFF_RESET)
+// Choose whether the broadcast receiver should be exported and visible to other apps on the device. If this receiver is listening for broadcasts sent from the system or from other apps—even other apps that you own—use the RECEIVER_EXPORTED flag. If instead this receiver is listening only for broadcasts sent by your app, use the RECEIVER_NOT_EXPORTED flag.
+        val listenToBroadcastsFromOtherApps = false
+        val receiverFlags = if (listenToBroadcastsFromOtherApps) {
+            ContextCompat.RECEIVER_EXPORTED
+        } else {
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        }
+
+// Register the receiver by calling registerReceiver():
+        ContextCompat.registerReceiver(context, priorityBackoffResetReceiver, filter, receiverFlags)
+
+
     }
 
     private val priorityIteratorRunnable = Runnable {

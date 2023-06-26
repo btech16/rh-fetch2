@@ -108,9 +108,19 @@ open class MutableExtras(protected val mutableData: MutableMap<String, String> =
 
     companion object CREATOR : Parcelable.Creator<MutableExtras> {
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(source: Parcel): MutableExtras {
-            return MutableExtras((source.readSerializable() as HashMap<String, String>).toMutableMap())
+            val extrasBundle = source.readBundle(HashMap::class.java.classLoader)
+            val extrasMap = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
+            return MutableExtras((extrasMap).toMutableMap())
         }
 
         override fun newArray(size: Int): Array<MutableExtras?> {

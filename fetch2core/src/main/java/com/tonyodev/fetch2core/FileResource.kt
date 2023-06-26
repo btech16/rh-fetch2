@@ -83,14 +83,24 @@ class FileResource : Parcelable, Serializable {
 
     companion object CREATOR : Parcelable.Creator<FileResource> {
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(source: Parcel): FileResource {
             val fileResource = FileResource()
             fileResource.id = source.readLong()
             fileResource.name = source.readString() ?: ""
             fileResource.length = source.readLong()
             fileResource.file = source.readString() ?: ""
-            fileResource.extras = Extras(source.readSerializable() as HashMap<String, String>)
+            val extrasBundle = source.readBundle(HashMap::class.java.classLoader)
+            val extrasMap = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
+            fileResource.extras = Extras(extrasMap)
             fileResource.md5 = source.readString() ?: ""
             return fileResource
         }

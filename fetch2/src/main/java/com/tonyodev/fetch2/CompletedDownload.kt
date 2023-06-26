@@ -90,18 +90,37 @@ open class CompletedDownload : Parcelable, Serializable {
 
     companion object CREATOR : Parcelable.Creator<CompletedDownload> {
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(source: Parcel): CompletedDownload {
             val url = source.readString() ?: ""
             val file = source.readString() ?: ""
             val groupId = source.readInt()
             val fileByteSize = source.readLong()
-            val headers = source.readSerializable() as Map<String, String>
+            val headersBundle = source.readBundle(HashMap::class.java.classLoader)
+            val headers = headersBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
+
             val tag = source.readString()
             val identifier = source.readLong()
             val created = source.readLong()
-            val extras = source.readSerializable() as Map<String, String>
-
+            val extrasBundle = source.readBundle(HashMap::class.java.classLoader)
+            val extras = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             val completedDownload = CompletedDownload()
             completedDownload.url = url
             completedDownload.file = file

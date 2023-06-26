@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import androidx.core.content.ContextCompat
+import androidx.core.net.ConnectivityManagerCompat
 import com.tonyodev.fetch2.NetworkType
 import com.tonyodev.fetch2core.isNetworkAvailable
 import com.tonyodev.fetch2core.isOnMeteredConnection
@@ -21,6 +24,7 @@ class NetworkInfoProvider constructor(
     private val context: Context,
     private val internetCheckUrl: String?
 ) {
+
 
     private val lock = Any()
     private val networkChangeListenerSet = hashSetOf<NetworkChangeListener>()
@@ -35,14 +39,14 @@ class NetworkInfoProvider constructor(
     private var networkCallback: Any? = null
 
     init {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && connectivityManager != null) {
+        if (connectivityManager != null) {
             val networkRequest = NetworkRequest.Builder()
                 .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
                 .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                 .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET)
                 .build()
-            val networkCallback: ConnectivityManager.NetworkCallback =
-                object : ConnectivityManager.NetworkCallback() {
+            val networkCallback: NetworkCallback =
+                object : NetworkCallback() {
 
                     override fun onLost(network: Network) {
                         notifyNetworkChangeListeners()
@@ -62,7 +66,7 @@ class NetworkInfoProvider constructor(
                     IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
                 )
                 broadcastRegistered = true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
 
             }
         }
@@ -94,13 +98,13 @@ class NetworkInfoProvider constructor(
             if (broadcastRegistered) {
                 try {
                     context.unregisterReceiver(networkChangeBroadcastReceiver)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
 
                 }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && connectivityManager != null) {
+            if (connectivityManager != null) {
                 val networkCallback = this.networkCallback
-                if (networkCallback is ConnectivityManager.NetworkCallback) {
+                if (networkCallback is NetworkCallback) {
                     connectivityManager.unregisterNetworkCallback(networkCallback)
                 }
             }
@@ -136,7 +140,7 @@ class NetworkInfoProvider constructor(
                     connection.connect()
                     connected = connection.responseCode != -1
                     connection.disconnect()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                 }
                 connected
             } else {

@@ -84,19 +84,38 @@ open class Request constructor(
 
     companion object CREATOR : Parcelable.Creator<Request> {
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(input: Parcel): Request {
             val url = input.readString() ?: ""
             val file = input.readString() ?: ""
             val identifier = input.readLong()
             val groupId = input.readInt()
-            val headers = input.readSerializable() as Map<String, String>
+            val headersBundle = input.readBundle(HashMap::class.java.classLoader)
+            val headers = headersBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             val priority = Priority.valueOf(input.readInt())
             val networkType = NetworkType.valueOf(input.readInt())
             val tag = input.readString()
             val enqueueAction = EnqueueAction.valueOf(input.readInt())
             val downloadOnEnqueue = input.readInt() == 1
-            val extras = input.readSerializable() as Map<String, String>
+            val extrasBundle = input.readBundle(HashMap::class.java.classLoader)
+            val extras = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             val autoRetryMaxAttempts = input.readInt()
             val request = Request(url, file)
             request.identifier = identifier

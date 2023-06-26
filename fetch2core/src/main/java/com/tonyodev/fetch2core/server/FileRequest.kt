@@ -76,8 +76,18 @@ data class FileRequest(
         const val FIELD_SIZE = "Size"
         const val FIELD_PERSIST_CONNECTION = "Persist-Connection"
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(source: Parcel): FileRequest {
+            val extrasBundle = source.readBundle(HashMap::class.java.classLoader)
+            val extrasMap = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             return FileRequest(
                 type = source.readInt(),
                 fileResourceId = source.readString() ?: "",
@@ -85,7 +95,7 @@ data class FileRequest(
                 rangeEnd = source.readLong(),
                 authorization = source.readString() ?: "",
                 client = source.readString() ?: "",
-                extras = Extras(source.readSerializable() as HashMap<String, String>),
+                extras = Extras(extrasMap),
                 page = source.readInt(),
                 size = source.readInt(),
                 persistConnection = source.readInt() == 1

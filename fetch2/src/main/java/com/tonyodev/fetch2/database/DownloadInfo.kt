@@ -224,7 +224,6 @@ open class DownloadInfo : Download {
 
     companion object CREATOR : Parcelable.Creator<DownloadInfo> {
 
-        @Suppress("UNCHECKED_CAST")
         override fun createFromParcel(source: Parcel): DownloadInfo {
             val id = source.readInt()
             val namespace = source.readString() ?: ""
@@ -232,7 +231,17 @@ open class DownloadInfo : Download {
             val file = source.readString() ?: ""
             val group = source.readInt()
             val priority = Priority.valueOf(source.readInt())
-            val headers = source.readSerializable() as Map<String, String>
+            val headersBundle = source.readBundle(HashMap::class.java.classLoader)
+            val headers = headersBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             val downloaded = source.readLong()
             val total = source.readLong()
             val status = Status.valueOf(source.readInt())
@@ -245,7 +254,17 @@ open class DownloadInfo : Download {
             val downloadOnEnqueue = source.readInt() == 1
             val etaInMilliSeconds = source.readLong()
             val downloadedBytesPerSecond = source.readLong()
-            val extras = source.readSerializable() as Map<String, String>
+            val extrasBundle = source.readBundle(HashMap::class.java.classLoader)
+            val extras = extrasBundle?.let { bundle ->
+                val hashMap = HashMap<String, String>()
+                for (key in bundle.keySet()) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        hashMap[key] = value
+                    }
+                }
+                hashMap
+            } ?: HashMap()
             val autoRetryMaxAttempts = source.readInt()
             val autoRetryAttempts = source.readInt()
 
