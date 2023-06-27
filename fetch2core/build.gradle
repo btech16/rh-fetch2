@@ -9,11 +9,11 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-
             }
         }
     }
 }
+
 buildscript {
     apply from: '../versions.gradle'
     repositories {

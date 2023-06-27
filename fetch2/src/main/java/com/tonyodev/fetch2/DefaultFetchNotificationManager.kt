@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 
 import com.tonyodev.fetch2.DownloadNotification.ActionType.*
 import com.tonyodev.fetch2.util.DEFAULT_NOTIFICATION_TIMEOUT_AFTER
@@ -60,7 +61,20 @@ abstract class DefaultFetchNotificationManager(context: Context) : FetchNotifica
     }
 
     override fun registerBroadcastReceiver() {
-        context.registerReceiver(broadcastReceiver, IntentFilter(notificationManagerAction))
+        // Create an instance of IntentFilter.
+        val filter = IntentFilter(notificationManagerAction)
+// Choose whether the broadcast receiver should be exported and visible to other apps on the device. If this receiver is listening for broadcasts sent from the system or from other apps—even other apps that you own—use the RECEIVER_EXPORTED flag. If instead this receiver is listening only for broadcasts sent by your app, use the RECEIVER_NOT_EXPORTED flag.
+        val listenToBroadcastsFromOtherApps = false
+        val receiverFlags = if (listenToBroadcastsFromOtherApps) {
+            ContextCompat.RECEIVER_EXPORTED
+        } else {
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        }
+
+// Register the receiver by calling registerReceiver():
+        ContextCompat.registerReceiver(context, broadcastReceiver, filter, receiverFlags)
+
+
     }
 
     override fun unregisterBroadcastReceiver() {
