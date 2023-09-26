@@ -1,6 +1,6 @@
 package com.tonyodev.fetch2
 
-import                                                                                                                                                                                                                                           android.annotation.SuppressLint
+import android.annotation.SuppressLint
 import android.app.*
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.BroadcastReceiver
@@ -11,11 +11,11 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-
 import com.tonyodev.fetch2.DownloadNotification.ActionType.*
 import com.tonyodev.fetch2.util.DEFAULT_NOTIFICATION_TIMEOUT_AFTER
 import com.tonyodev.fetch2.util.DEFAULT_NOTIFICATION_TIMEOUT_AFTER_RESET
 import com.tonyodev.fetch2.util.onDownloadNotificationActionTriggered
+
 
 /**
  * The default notification manager class for Fetch. This manager supports both single
@@ -190,7 +190,6 @@ abstract class DefaultFetchNotificationManager(context: Context) : FetchNotifica
         }
     }
 
-    @SuppressLint("UnspecifiedImmutableFlag")
     override fun getActionPendingIntent(
         downloadNotification: DownloadNotification,
         actionType: DownloadNotification.ActionType
@@ -211,21 +210,17 @@ abstract class DefaultFetchNotificationManager(context: Context) : FetchNotifica
                 else -> ACTION_TYPE_INVALID
             }
             intent.putExtra(EXTRA_ACTION_TYPE, action)
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getBroadcast(
-                    context,
-                    downloadNotification.notificationId + action,
-                    intent,
-                    FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            } else PendingIntent.getBroadcast(
+            val flag = getIntentFlag()
+            return PendingIntent.getBroadcast(
                 context,
                 downloadNotification.notificationId + action,
                 intent,
-                FLAG_UPDATE_CURRENT
+                flag,
             )
         }
     }
+
+    private fun getIntentFlag():Int = if  (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else FLAG_UPDATE_CURRENT
 
     override fun getGroupActionPendingIntent(
         groupId: Int,
@@ -246,18 +241,12 @@ abstract class DefaultFetchNotificationManager(context: Context) : FetchNotifica
                 else -> ACTION_TYPE_INVALID
             }
             intent.putExtra(EXTRA_ACTION_TYPE, action)
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getBroadcast(
-                    context,
-                    groupId + action,
-                    intent,
-                    FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-                )
-            } else PendingIntent.getBroadcast(
+            val flag = getIntentFlag()
+            return PendingIntent.getBroadcast(
                 context,
                 groupId + action,
                 intent,
-                FLAG_UPDATE_CURRENT
+                flag,
             )
         }
     }
